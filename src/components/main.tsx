@@ -1,6 +1,6 @@
 import { AuthContext } from '@/providers/FirebaseAuthProvider';
 import { useContext } from 'react';
-import { EnhancedVuMeterInterface } from './enhanced-vu-meter-interface';
+import { Interface } from './interface';
 import { LoginFormComponent } from "./login-form";
 
 export const Main = () => {
@@ -8,7 +8,7 @@ export const Main = () => {
   console.log(user);
   if (user) {
     return (
-      <EnhancedVuMeterInterface />
+      <Interface />
     );
   } else {
     return (

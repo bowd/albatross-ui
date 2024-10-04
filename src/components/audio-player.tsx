@@ -3,7 +3,7 @@ import { Play, Pause, SkipBack, SkipForward } from 'lucide-react'
 import AudioMotionAnalyzer from 'audiomotion-analyzer'
 import { Song } from '@/providers/SongsProvider'
 
-export function AudioPlayer({ song }: Song) {
+export function AudioPlayer({ song }: { song: Song }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -27,6 +27,10 @@ export function AudioPlayer({ song }: Song) {
   }, [])
 
   useEffect(() => {
+    setIsPlaying(false)
+  }, [song])
+
+  useEffect(() => {
     if (containerRef.current && audioRef.current && !analyzerRef.current) {
       const initializeAudio = () => {
         if (audioContextRef.current) {
@@ -35,9 +39,10 @@ export function AudioPlayer({ song }: Song) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
 
         if (sourceNodeRef.current) {
+          console.log("Disconnecting source node")
           sourceNodeRef.current.disconnect()
         }
-        sourceNodeRef.current = audioContextRef.current.createMediaElementSource(audioRef.current!)
+        sourceNodeRef.current = audioContextRef.current.createMediaElementSource(audioRef.current)
 
         analyzerRef.current = new AudioMotionAnalyzer(containerRef.current, {
           source: sourceNodeRef.current,
@@ -63,21 +68,6 @@ export function AudioPlayer({ song }: Song) {
       }
 
       initializeAudio()
-
-      return () => {
-        if (analyzerRef.current) {
-          analyzerRef.current.destroy()
-          analyzerRef.current = null
-        }
-        if (sourceNodeRef.current) {
-          sourceNodeRef.current.disconnect()
-          sourceNodeRef.current = null
-        }
-        if (audioContextRef.current) {
-          audioContextRef.current.close()
-          audioContextRef.current = null
-        }
-      }
     }
   }, [])
 
@@ -106,8 +96,8 @@ export function AudioPlayer({ song }: Song) {
   }
 
   return (
-    <div className="tw-w-full tw-bg-gray-900 tw-text-white tw-p-4 tw-rounded-lg tw-shadow-lg">
-      <div className="tw-mb-4 tw-h-24 tw-bg-white tw-overflow-hidden" ref={containerRef}>
+    <div className="tw-w-full tw-bg-gray-800 tw-text-white tw-p-4 tw-rounded-lg tw-shadow-lg">
+      <div className="tw-mb-4 tw-h-24 tw-bg-white tw-rounded-lg tw-overflow-hidden" ref={containerRef}>
       </div>
       <div className="tw-text-center tw-mb-4 tw-truncate">{song.name}</div>
       <div className="tw-flex tw-justify-center tw-space-x-4">

@@ -6,7 +6,6 @@ import { ref, listAll, getDownloadURL, getBlob } from "firebase/storage"
 export interface Song {
   name: string
   url: string
-  blob: Blob
 }
 
 export const SongsContext = createContext<{ songs: Song[] }>({
@@ -28,7 +27,6 @@ export const SongsProvider = ({ children }) => {
         return {
           name: file.name,
           url: await getDownloadURL(file),
-          blob: await getBlob(file)
         }
       }))
       console.log(songs)
