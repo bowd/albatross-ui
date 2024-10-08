@@ -8,6 +8,7 @@ interface Variant {
   particleCount: number
   pointSize: string
   materialColor: THREE.Color
+  camera0: number
 }
 
 const defaultMacros: Variant = {
@@ -15,6 +16,7 @@ const defaultMacros: Variant = {
   particleCount: 400,
   pointSize: '400.0',
   materialColor: new THREE.Color(0x1225ff),
+  camera0: 145
 }
 
 const variants: { [key: string]: Variant } = {
@@ -27,7 +29,7 @@ const variants: { [key: string]: Variant } = {
     ...defaultMacros,
     textureUrl: 'https://github.com/mrdoob/three.js/blob/master/examples/textures/lensflare/lensflare0_alpha.png?raw=true',
     particleCount: 800,
-    pointSize: '450.0',
+    pointSize: '320.0',
   },
   var3: {
     ...defaultMacros,
@@ -35,7 +37,14 @@ const variants: { [key: string]: Variant } = {
     particleCount: 600,
     pointSize: '400.0',
     materialColor: new THREE.Color(0x2225ff),
-  }
+  },
+  var4: {
+    ...defaultMacros,
+    textureUrl: 'https://github.com/mrdoob/three.js/blob/master/examples/textures/lensflare/lensflare0_alpha.png?raw=true',
+    particleCount: 800,
+    pointSize: '300.0',
+    camera0: 160
+  },
 }
 
 const VARIANT = variants.var2;
@@ -89,14 +98,14 @@ const ParticleAnimation: React.FC<ParticleAnimationProps> = ({
       case 'normal':
         return { speed: 0.5, orbitRadius: 20, baseOrbitSpeed: 1.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
       case 'alert':
-        return { speed: 0.5, orbitRadius: 40, baseOrbitSpeed: 3.0, accelerationDuration: 3000, maxAcceleration: 0.5 };
+        return { speed: 0.5, orbitRadius: 40, baseOrbitSpeed: 3.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
       case 'communicating':
-        return { speed: 0.5, orbitRadius: 50, baseOrbitSpeed: 4.0, accelerationDuration: 2000, maxAcceleration: 0.8 };
+        return { speed: 0.5, orbitRadius: 50, baseOrbitSpeed: 4.0, accelerationDuration: 3000, maxAcceleration: 0.8 };
     }
   };
 
   const sigmoid = (x: number): number => {
-    return 1 / (1 + Math.exp(-x))
+    return 1 / (1 + Math.exp(-1 * (x - 3)))
   }
 
   const createParticles = (count: number, width: number, height: number): THREE.BufferGeometry => {
@@ -172,8 +181,8 @@ const ParticleAnimation: React.FC<ParticleAnimationProps> = ({
     console.log('ParticleAnimation mounted [reinit]');
 
     const scene = new THREE.Scene();
-    const aspectRatio = width / height * 1.1;
-    const camera = new THREE.PerspectiveCamera(145, aspectRatio, 0.06, 400);
+    const aspectRatio = width / height;
+    const camera = new THREE.PerspectiveCamera(VARIANT.camera0, aspectRatio, 0.06, 400);
     camera.position.z = 100;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
@@ -268,7 +277,7 @@ const ParticleAnimation: React.FC<ParticleAnimationProps> = ({
 
         // Calculate acceleration
         const accelerationProgress = ((time + accelerationTimes[i / 3]) % accelerationDuration) / accelerationDuration;
-        const accelerationFactor = 1.1; // sigmoid(accelerationStates[i / 3] * (accelerationProgress * 2 - 1) * 4) * 2 - 1;
+        const accelerationFactor = sigmoid(accelerationStates[i / 3] * (accelerationProgress * 2 - 1) * 4);
         const currentSpeed = baseOrbitSpeed * (1 + accelerationFactor * (maxAcceleration - 1));
 
         // Orbital movement

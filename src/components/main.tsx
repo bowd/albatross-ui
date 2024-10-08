@@ -12,7 +12,7 @@ export const Main = () => {
     );
   } else {
     return (
-      <div className="tw-flex tw-items-center tw-justify-center tw-h-screen">
+      <div className="flex items-center justify-center h-screen bg-white dark:bg-black">
         <LoginFormComponent />
       </div>
     )

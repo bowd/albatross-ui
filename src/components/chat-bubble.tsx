@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface ChatBubbleProps {
   text: string
@@ -29,7 +30,7 @@ const useTypingEffect = (text: string, delay: number, startTyping: boolean) => {
   return displayText
 }
 
-export function ChatBubbleComponent({ text, className }: ChatBubbleProps) {
+export function ChatBubbleComponent({ text, className, style }: ChatBubbleProps) {
   const [isInitialTyping, setIsInitialTyping] = useState(true)
   const displayText = useTypingEffect(text, 100, !isInitialTyping)
 
@@ -42,27 +43,48 @@ export function ChatBubbleComponent({ text, className }: ChatBubbleProps) {
   }, [])
 
   return (
-    <div
-      className={cn(
-        "tw-rounded-lg tw-bg-gray-100 tw-transition-all tw-duration-300 tw-ease-in-out tw-min-h-14 tw-leading-normal",
-        isInitialTyping ? "tw-w-20" : "tw-w-full tw-max-w-md",
-        className
-      )}
-    >
-      <div className={cn(
-        "tw-h-full tw-flex tw-items-center tw-transition-all tw-duration-300 tw-ease-in-out",
-        isInitialTyping ? "tw-justify-center tw-p-6" : "tw-justify-start tw-p-5"
-      )}>
-        {isInitialTyping ? (
-          <div className="tw-flex tw-space-x-2">
-            <div className="tw-w-2 tw-h-2 tw-rounded-full tw-bg-slate-600 tw-animate-bounce" />
-            <div className="tw-w-2 tw-h-2 tw-rounded-full tw-bg-slate-600 tw-animate-bounce tw-delay-100" />
-            <div className="tw-w-2 tw-h-2 tw-rounded-full tw-bg-slate-600 tw-animate-bounce tw-delay-200" />
-          </div>
-        ) : (
-          <p className="tw-break-words tw-whitespace-pre-wrap tw-overflow-hidden">{displayText}</p>
+    <AnimatePresence>
+      <motion.div
+        key={text}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={cn(
+          "dark:bg-slate-700 dark:text-white rounded-lg bg-gray-100 transition-all duration-300 min-h-14 leading-normal mb-4",
+          isInitialTyping ? "w-20" : "w-full max-w-md",
+          className
         )}
-      </div>
+        style={style}
+      >
+        <div className={cn(
+          "h-full flex items-center transition-all duration-300 ease-in-out",
+          isInitialTyping ? "justify-center p-6" : "justify-start p-5"
+        )}>
+          {isInitialTyping ? (
+            <div className="flex space-x-2">
+              <div className="w-2 h-2 rounded-full bg-slate-700 dark:bg-white animate-bounce" />
+              <div className="w-2 h-2 rounded-full bg-slate-700 dark:bg-white animate-bounce delay-100" />
+              <div className="w-2 h-2 rounded-full bg-slate-700 dark:bg-white animate-bounce delay-200" />
+            </div>
+          ) : (
+            <p className="break-words whitespace-pre-wrap overflow-hidden">{displayText}</p>
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
+interface ChatProps {
+  messages: { text: string; timestamp: number }[]
+}
+
+export const ChatSection = ({ messages }: ChatProps) => {
+  return (
+    <div>
+      {messages.map((message) => (
+        <ChatBubbleComponent key={message.timestamp} text={message.text} />
+      ))}
     </div>
   )
 }

@@ -21,13 +21,13 @@ export function LoginFormComponent() {
   }
 
   return (
-    <Card className="tw-w-[350px]">
+    <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle className="tw-text-2xl">Login</CardTitle>
+        <CardTitle className="text-2xl">Login</CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="tw-space-y-4">
-          <div className="tw-space-y-2">
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
@@ -38,7 +38,7 @@ export function LoginFormComponent() {
               required
             />
           </div>
-          <div className="tw-space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
@@ -51,7 +51,7 @@ export function LoginFormComponent() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="tw-w-full">
+          <Button type="submit" className="w-full">
             Log In
           </Button>
         </CardFooter>

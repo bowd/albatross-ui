@@ -1,63 +1,100 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { FileAudio2 } from 'lucide-react'
-import { AudioPlayer } from './audio-player'
-import { ref, onValue } from 'firebase/database'
+import { FileAudio2, Play, Pause, MessageCircle, AudioLines } from 'lucide-react'
+import { AudioPlayer } from './minimal-player'
+import { ref, set, remove } from 'firebase/database'
 import { AuthContext } from '@/providers/FirebaseAuthProvider'
 import { db } from "@/lib/firebase"
-import { ChatBubbleComponent } from './chat-bubble'
+import { ChatSection } from './chat-bubble'
 import { useListVals, useObjectVal } from 'react-firebase-hooks/database'
 import ParticleAnimation from './particle'
+import { Song } from '@/providers/SongsProvider'
+
+const Section = ({ children }: { children: React.ReactNode }) => (
+  <div className="w-1/2 flex flex-col card-bg rounded-lg dark:border-2 dark:border-slate-700 shadow-md overflow-hidden">
+    {children}
+  </div>
+)
+
+const Header = ({ children }: { children: React.ReactNode }) => (
+  <div className="bg-blue-400 dark:bg-slate-700 text-white p-2 flex justify-center items-center">
+    {children}
+  </div>
+)
+
+const Content = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex-1 p-4 overflow-y-auto space-y-4">
+    {children}
+  </div>
+)
 
 
 export function Interface() {
   const { signOut, user } = useContext(AuthContext)
-  // const [messages, setMessages] = useState<Array<{ text: string; timestamp: number, uid: string }>>([])
-  // const [queue, setQueue] = useState<Array<{ name: string; url: string }>>([])
-  const [selectedFile, setSelectedFile] = useState(null)
   const [messages] = useListVals(ref(db, `users/${user.uid}/messages`))
-  const [queue] = useListVals(ref(db, `users/${user.uid}/queue`))
+  const [queue] = useListVals<Song>(ref(db, `users/${user.uid}/queue`))
   const [symbol] = useObjectVal(ref(db, `users/${user.uid}/symbol`))
+  const [playing] = useObjectVal<Song>(ref(db, `users/${user.uid}/playing`))
+
+  const togglePlay = (song: Song) => {
+    const playingRef = ref(db, `users/${user.uid}/playing`)
+    if (playing && playing.name === song.name) {
+      remove(playingRef)
+    } else {
+      set(playingRef, { name: song.name, url: song.url })
+    }
+  }
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-screen tw-bg-gray-100 tw-text-gray-800 tw-font-sans tw-text-lg">
-      <div className="tw-flex tw-flex-1 tw-overflow-hidden tw-p-2 tw-space-x-2">
-        <div className="tw-w-1/2 tw-flex tw-flex-col tw-bg-white tw-rounded-lg tw-shadow-md tw-overflow-hidden">
-          <div className="tw-flex-1 tw-p-4 tw-overflow-y-auto tw-space-y-4">
-            {messages.map((message) => (
-              <ChatBubbleComponent key={message.timestamp} text={message.text} />
-            ))}
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-black font-sans text-lg">
+      <div className="flex flex-1 overflow-hidden p-2 space-x-2">
+        <Section>
+          <Header>
+            <MessageCircle size={24} />
+          </Header>
+          <Content>
+            <ChatSection messages={messages} />
+          </Content>
+          <div className="flex items-center justify-center absolute bottom-0 left-10">
+            <ParticleAnimation {...symbol} height={350} width={400} />
           </div>
-          <div className="tw-flex tw-items-center tw-justify-center tw-m-4 tw-relative tw-top-8">
-            <ParticleAnimation {...symbol} />
-          </div>
-        </div>
+        </Section>
 
-        <div className="tw-w-1/2 tw-flex tw-flex-col tw-bg-white tw-rounded-lg tw-shadow-md tw-overflow-hidden">
-          <div className="tw-flex-1 tw-p-4 tw-overflow-y-auto tw-space-y-2">
+        <Section>
+          <Header>
+            <AudioLines size={24} />
+          </Header>
+          <Content>
             {queue.map((song) => (
               <div
                 key={song.url}
-                className={`tw-p-2 tw-cursor-pointer tw-hover:tw-bg-gray-100 tw-rounded ${selectedFile === song.name ? 'tw-bg-blue-100' : ''
+                className={`p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 rounded ${playing && playing.name === song.name ? 'bg-blue-100 dark:bg-slate-700' : ''
                   }`}
-                onClick={() => setSelectedFile(song.name)}
+                onClick={() => togglePlay(song)}
               >
-                <div className="tw-flex tw-items-center">
-                  <FileAudio2 className="tw-mr-2 tw-text-blue-500" size={20} />
-                  <span className="tw-mr-4">{song.name}</span>
+                <div className="flex items-center pointer group">
+                  {playing && playing.name === song.name ? (
+                    <Pause className="mr-2 text-red-500" size={20} />
+                  ) : (
+                    <>
+                      <FileAudio2 className="mr-2 text-blue-500 dark:text-white group-hover:hidden" size={20} />
+                      <Play className="mr-2 text-blue-500 dark:text-white hidden group-hover:flex" size={20} />
+                    </>
+                  )}
+                  <span className="mr-4 dark:text-white">{song.name}</span>
                 </div>
               </div>
             ))}
-          </div>
+          </Content>
 
-          {selectedFile && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-m-4">
-              <AudioPlayer song={queue.find((song) => song.name === selectedFile)} />
+          {playing && playing.url && (
+            <div className="flex items-center justify-center m-4">
+              <AudioPlayer song={playing} />
             </div>
           )}
-        </div>
+        </Section>
       </div>
 
-      <div className="tw-bg-gray-200 tw-text-gray-700 tw-p-2 tw-text-sm"
+      <div className="bg-gray-200 dark:bg-black text-gray-700 dark:text-white p-2 text-sm"
         onClick={signOut}>
         Ready
       </div>
