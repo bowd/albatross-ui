@@ -62,5 +62,8 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.169.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "4.24.0"
   }
 }
