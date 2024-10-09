@@ -14,7 +14,7 @@ export interface IAuth {
 export const AuthContext = createContext<IAuth>({
   user: auth.currentUser,
   loading: false,
-  signIn: () => { },
+  signIn: async () => { },
   signUp: () => { },
   signOut: () => { },
 });
@@ -51,8 +51,8 @@ export const FirebaseAuthProvider = ({ children }) => {
   }
 
   //Sign in
-  const signIn = async (creds: LoginFormValues, onSuccess: () => void) => {
-    //setIsLoading(true);
+  const signIn = async (creds: LoginFormValues) => {
+    setIsLoading(true);
     firebaseSignIn(creds)
       .then(signInResult => {
         console.log(signInResult);
@@ -77,10 +77,11 @@ export const FirebaseAuthProvider = ({ children }) => {
 
   //Sign out
   const signOut = async () => {
-    // setIsLoading(true);
+    setIsLoading(true);
     try {
       await firebaseSignOut();
       setCurrentUser(null);
+      setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       //show error alert
@@ -105,7 +106,7 @@ export const FirebaseAuthProvider = ({ children }) => {
   }, []);
 
   //If loading for the first time when visiting the page
-  // if (isAuthLoading) return 
+  if (isAuthLoading) return
   return (
     <AuthContext.Provider value={authValues}>
       {children}

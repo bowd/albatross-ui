@@ -54,7 +54,7 @@ export function Interface() {
           <Content>
             <ChatSection messages={messages} />
           </Content>
-          <div className="flex items-center justify-center absolute bottom-0 left-10">
+          <div className="flex items-center justify-center absolute bottom-10 left-[calc(25%-200px)]">
             <ParticleAnimation {...symbol} height={350} width={400} />
           </div>
         </Section>

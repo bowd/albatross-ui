@@ -49,7 +49,7 @@ const variants: { [key: string]: Variant } = {
 
 const VARIANT = variants.var2;
 
-type AnimationState = 'normal' | 'alert' | 'communicating';
+type AnimationState = 'normal' | 'alert' | 'agitated';
 interface StateParams {
   speed: number;
   orbitRadius: number;
@@ -99,8 +99,10 @@ const ParticleAnimation: React.FC<ParticleAnimationProps> = ({
         return { speed: 0.5, orbitRadius: 20, baseOrbitSpeed: 1.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
       case 'alert':
         return { speed: 0.5, orbitRadius: 40, baseOrbitSpeed: 3.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
-      case 'communicating':
+      case 'agitated':
         return { speed: 0.5, orbitRadius: 50, baseOrbitSpeed: 4.0, accelerationDuration: 3000, maxAcceleration: 0.8 };
+      default:
+        return { speed: 0.5, orbitRadius: 20, baseOrbitSpeed: 1.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
     }
   };
 
