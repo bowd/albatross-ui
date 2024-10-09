@@ -96,17 +96,18 @@ const ParticleAnimation: React.FC<ParticleAnimationProps> = ({
   const getStateParams = (state: AnimationState): StateParams => {
     switch (state) {
       case 'normal':
-        return { speed: 0.5, orbitRadius: 20, baseOrbitSpeed: 1.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
+        return { speed: 0.5, orbitRadius: 10, baseOrbitSpeed: 2.0, accelerationDuration: 10000, maxAcceleration: 0.5 };
       case 'alert':
-        return { speed: 0.5, orbitRadius: 40, baseOrbitSpeed: 3.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
+        return { speed: 0.5, orbitRadius: 40, baseOrbitSpeed: 7.0, accelerationDuration: 10000, maxAcceleration: 0.2 };
       case 'agitated':
-        return { speed: 0.5, orbitRadius: 50, baseOrbitSpeed: 4.0, accelerationDuration: 3000, maxAcceleration: 0.8 };
+        return { speed: 0.5, orbitRadius: 50, baseOrbitSpeed: 10.0, accelerationDuration: 10000, maxAcceleration: 0.2 };
       default:
         return { speed: 0.5, orbitRadius: 20, baseOrbitSpeed: 1.0, accelerationDuration: 1000, maxAcceleration: 0.5 };
     }
   };
 
   const sigmoid = (x: number): number => {
+    return 1;
     return 1 / (1 + Math.exp(-1 * (x - 3)))
   }
 
@@ -269,8 +270,6 @@ const ParticleAnimation: React.FC<ParticleAnimationProps> = ({
 
       for (let i = 0; i < positions.length; i += 3) {
         // Move towards target
-        positions[i] += (targets[i] - positions[i]) * speed * 0.02;
-        positions[i + 1] += (targets[i + 1] - positions[i + 1]) * speed * 0.02;
         positions[i + 2] += (targets[i + 2] - positions[i + 2]) * speed * 0.02;
 
         orbitCenters[i] += (targets[i] - orbitCenters[i]) * speed * 0.02;
@@ -280,11 +279,12 @@ const ParticleAnimation: React.FC<ParticleAnimationProps> = ({
         // Calculate acceleration
         const accelerationProgress = ((time + accelerationTimes[i / 3]) % accelerationDuration) / accelerationDuration;
         const accelerationFactor = sigmoid(accelerationStates[i / 3] * (accelerationProgress * 2 - 1) * 4);
-        const currentSpeed = baseOrbitSpeed * (1 + accelerationFactor * (maxAcceleration - 1));
+        const speedModifier = (1 + accelerationFactor * 0.00001);
+        const currentSpeed = baseOrbitSpeed * speedModifier;
 
         // Orbital movement
-        const currentRadius = orbitRadii[i / 3] * (orbitRadius * 2 / 3 + Math.sin(time * 0.0005) * orbitRadius / 3);
-        const angleChange = currentSpeed * deltaTime * 0.001 * (currentRadius * 0.05); // Convert to seconds and apply speed
+        const currentRadius = orbitRadii[i / 3] * (orbitRadius * 2 / 3 + Math.sin(time * 0.00005) * orbitRadius / 3);
+        const angleChange = currentSpeed * deltaTime * 0.002 * (currentRadius * 0.009); // Convert to seconds and apply speed
         orbitAngles[i / 3] = (orbitAngles[i / 3] + angleChange) % (Math.PI * 2);
 
         const orbitX = Math.cos(orbitAngles[i / 3]) * currentRadius;
